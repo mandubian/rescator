@@ -10,4 +10,6 @@ log
 bin
 target
 project
+.target
+.cache
 
