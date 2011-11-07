@@ -9,7 +9,9 @@ lib
 log
 bin
 target
-project
+project/boot
+project/project
+project/target
 .target
 .cache
 

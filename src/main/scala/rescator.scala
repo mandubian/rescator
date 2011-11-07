@@ -4,26 +4,30 @@ import dispatch.Request
 import dispatch.json
 import dispatch.HandlerVerbs
 import dispatch.json._
-import dispatch.json.Js._
 	
-package object rescator {
+package object rescator extends ImplicitHandlerVerbs with Js{
+	import dispatch.json.Js._
+
 	def GET(req:Request):Request = req
 	def POST(req:Request):Request = req.POST
 	
-	implicit def handlertoJsonHandler(subject: HandlerVerbs) = new JsonHandler(subject)
 }
 
 package rescator {
 
-	trait ImplicitHandlerVerbs {
-	  implicit def toHandlerVerbs(req: Request) = new HandlerVerbs(req)
-	  implicit def stringToHandlerVerbs(str: String) = new HandlerVerbs(new Request(str))
+	trait ImplicitHandlerVerbs {		
+		import dispatch.json.Js._
+		
+		implicit def handlertoRescatorHandler(subject: HandlerVerbs) = new RescatorHandler(subject)
+		implicit def requesttoRescatorHandler(request:Request) = new RescatorHandler(request)
+		implicit def stringToRescatorHandler(str: String) = new RescatorHandler(new Request(str))
 	}
 
-	case class JsonHandler(subject:HandlerVerbs) {
-		def >>> [T](block: json.Js.JsF[T]) = subject >> { (stm, charset) =>
-			block(json.Js(stm, charset))
-		}
+	
+	case class RescatorHandler(subject:HandlerVerbs) {
+		import dispatch.json.JsHttp._
+		import dispatch.Http
+		def >>> [T](block: json.Js.JsF[T]) = Http(subject ># block)		
 	}
 	
 	
