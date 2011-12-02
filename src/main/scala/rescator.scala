@@ -36,12 +36,16 @@ package rescator {
 	// //:parent/child1/child11
 	case class JsonXPath(parent:Option[JsonXPath] = None, sym:Symbol) {
 		def / (childSym: Symbol)  = JsonXPath(Some(this), childSym)
-		def as[T](ext:Extract[T]):Child[T, Property[T]] = {
+		private def asObj:Obj = {
 		  val parentObj:Option[Obj] = parent match {
-		    case Some(p) => Some(p as obj)
+		    case Some(p) => Some(p asObj)
 		    case None => None
 		  }
-		  new Child[T, Property[T]](parent..getOrElse(None) as obj, Property(sym, ext))
+		  new Obj(sym)(parentObj)
+		}
+		
+		def as[T](ext:Extract[T]):Child[T, Property[T]] = {
+		  new Child[T, Property[T]](parent.get.asObj, Property(sym, ext))
 		}
 	}
 	
