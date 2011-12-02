@@ -22,11 +22,27 @@ package rescator {
 		implicit def requesttoRescatorHandler(request:Request) = new RescatorHandler(request)
 		implicit def stringToRescatorHandler(str: String) = new RescatorHandler(new Request(str))
 		
-		implicit def symToRescatorJsonSymOp(sym:Symbol) = RescatorChild(sym, None)
+		//implicit def symToRescatorJsonSymOp(sym:Symbol) = RescatorChild(sym, None)
+		implicit def symToJsonXPath(sym:Symbol) = JsonXPath(None, sym)
 	}
 
-	case class JsonXPath(sym:Symbol, parent:Option[Obj] = None) {
+	// JsonXPath('child, 'parent)
+	// JsonXPath(JsonXPath('parent), 'child)
+	// JsonXPath(JsonXPath(JsonXPath('parent), 'child), 'child2)
 	
+	// JsonXPath('parent, JsonXPath('child1, JsonXPath('child11)))
+	// { "parent" : { "child1" : { "child11" : "blabla" } } } 
+	// /:parent/child1/child11
+	// //:parent/child1/child11
+	case class JsonXPath(parent:Option[JsonXPath] = None, sym:Symbol) {
+		def / (childSym: Symbol)  = JsonXPath(Some(this), childSym)
+		def as[T](ext:Extract[T]):Child[T, Property[T]] = {
+		  val parentObj:Option[Obj] = parent match {
+		    case Some(p) => Some(p as obj)
+		    case None => None
+		  }
+		  new Child[T, Property[T]](parent..getOrElse(None) as obj, Property(sym, ext))
+		}
 	}
 	
 	trait RestHandler {
