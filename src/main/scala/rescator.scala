@@ -22,7 +22,6 @@ package rescator {
 		implicit def requesttoRescatorHandler(request:Request) = new RescatorHandler(request)
 		implicit def stringToRescatorHandler(str: String) = new RescatorHandler(new Request(str))
 		
-		//implicit def symToRescatorJsonSymOp(sym:Symbol) = RescatorChild(sym, None)
 		implicit def symToJsonXPath(sym:Symbol) = JsonXPath(None, sym)
 	}
 
@@ -30,7 +29,6 @@ package rescator {
 	// JsonXPath(JsonXPath('parent), 'child)
 	// JsonXPath(JsonXPath(JsonXPath('parent), 'child), 'child2)
 	
-	// JsonXPath('parent, JsonXPath('child1, JsonXPath('child11)))
 	// { "parent" : { "child1" : { "child11" : "blabla" } } } 
 	// /:parent/child1/child11
 	// //:parent/child1/child11
@@ -39,10 +37,11 @@ package rescator {
 				
 		def parentOf(childSym: Symbol) = this \ childSym
 				
-		def as[T](ext:Extract[T]):Child[T, Property[T]] = {		  
-		  new Child[T, Property[T]](
+		def as[T](ext:Extract[T]):JsF[T] = {		  
+		  Js.ext2fun(new Child[T, Property[T]](
 		      parent.flatMap(_.asObj), 
-		      Property(sym, ext))
+		      Property(sym, ext)
+		  ))
 		}
 		
 		private def asObj:Option[Obj] = {
@@ -54,24 +53,62 @@ package rescator {
 		}
 	}
 	
-	trait RestHandler {
-		def >>>[T](paths:JsonXPath*)
+	class \ {
+	  
 	}
 	
-	case class RescatorHandler(subject:HandlerVerbs) {
+	trait RestHandler {
+		def >>> [OS <: java.io.OutputStream](out: OS)
+		def >>>[T](block: json.Js.JsF[T]):T
+		def >>>[T1, T2](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2]):(T1, T2)
+		def >>>[T1, T2, T3](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2], block3: json.Js.JsF[T3]):(T1, T2, T3)
+		def >>>[T1, T2, T3, T4](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2], block3: json.Js.JsF[T3], block4: json.Js.JsF[T4]):(T1, T2, T3, T4)
+		def >>>[T1, T2, T3, T4, T5](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2], block3: json.Js.JsF[T3], block4: json.Js.JsF[T4], block5: json.Js.JsF[T5]): (T1, T2, T3, T4, T5)
+	}
+	
+	class RescatorHandler(subject:HandlerVerbs) extends RestHandler {
 		import dispatch.json.JsHttp._
 		import dispatch.Http
-		def >>> [T](block: json.Js.JsF[T]) = Http(subject ># block)
+		def >>> [OS <: java.io.OutputStream](out: OS) = subject >>> out
+		 
+		private def callHttp[T](block: (java.io.InputStream, String) => T):T = Http(subject >> block)  
+		  
+		def >>>[T](block: json.Js.JsF[T]) = {
+			callHttp { (stream, charset) =>
+				val jsValue = json.Js(stream, charset)
+				block(jsValue)
+			}
+		}
+		
+		def >>>[T1, T2](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2]) = {
+			callHttp { (stream, charset) =>
+				val jsValue = json.Js(stream, charset)
+				(block1(jsValue), block2(jsValue))
+			}
+		}
+
+		def >>>[T1, T2, T3](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2], block3: json.Js.JsF[T3]) = {
+			callHttp { (stream, charset) =>
+				val jsValue = json.Js(stream, charset)
+				(block1(jsValue), block2(jsValue), block3(jsValue))
+			}
+		}
+
+		def >>>[T1, T2, T3, T4](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2], block3: json.Js.JsF[T3], block4: json.Js.JsF[T4]) = {
+			callHttp { (stream, charset) =>
+				val jsValue = json.Js(stream, charset)
+				(block1(jsValue), block2(jsValue), block3(jsValue), block4(jsValue))
+			}
+
+		}
+		
+		def >>>[T1, T2, T3, T4, T5](block1: json.Js.JsF[T1], block2: json.Js.JsF[T2], block3: json.Js.JsF[T3], block4: json.Js.JsF[T4], block5: json.Js.JsF[T5]) = {
+			callHttp { (stream, charset) =>
+				val jsValue = json.Js(stream, charset)
+				(block1(jsValue), block2(jsValue), block3(jsValue), block4(jsValue), block5(jsValue))
+			}
+		}
+
 	}
-	
-	case class RescatorChild(sym:Symbol, parent:Option[Obj]) {
-	  import dispatch.json.Property
-	  
-	  def as[T](ext:Extract[T]) = {
-	    new Child[T, Property[T]](parent, Property(sym, ext))
-	  }
-	  
-	  def / [T](childsym: Symbol) = RescatorChild(childsym, Some(new Obj(sym)))
-	}
-	// (alpha, delta) = GET("http://...") >>> ( 'alpha, 'beta/'delta )
+
 }
