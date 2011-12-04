@@ -1,0 +1,45 @@
+h1. Rescator is a very simple Scala Json Rest Client API
+
+bq. alpha version so should evolve quite a lot
+
+For the time being, Rescator is *100% Scala* and is aimed at:
+* *Calling Rest Json API in a very simple way*
+* *Mapping received Json data to tuples using XPath-like syntax*
+* No (_too_) weird operators
+
+Rescator wraps the great Scala "dispatch library":https://github.com/dispatch/dispatch which is really powerful and designed in a fantastic way but quite _cryptic_ to use IMHO. Not being a Scala guru yet and loving clear code, I must admit that _dispatch_ relies too much on those weird operators (>~, >#, >-, >:>...) mixed with extreme functional syntax. It makes very concise code but quite difficult to read and to write for the basic developer. 
+I love Scala in a whole but richness of an API relies not only on its intrinsic power but also on its simplicity of usage. Scala versatile syntax allows to provide simplicity so why not create simple APIs completely hiding its complex guts?
+My aim is this one and even if I don't succeed, I'll try...
+
+Here is a sample working code with this very draft code:
+
+bc.. import org.mandubian.rescator._
+
+val (query_obj, query_type, trim_place) = 
+	GET("https://api.twitter.com/1/geo/search.json?query=Twitter%20HQ") >>> 
+		(	
+			'query as obj, 
+			'query\'type as str, 
+			'query\'params\'trim_place as bool
+		)
+
+p. 
+
+* *GET("url")* to call an URL in GET mode (POST should come soon)
+* XPath based on symbols *'parent\'child* to get child node in JSON @{ parent : { child : "blabla" } }@
+
+bq. why \ instead of / ? because // XPath expression will be added and // is a comment in Scala and in Scala-XML, they also use \
+
+* *as* to tell the tuple mapper what is the expected type. Here are the accepted extractors coming:
+** _str_ for a string
+** _bool_ for a boolean
+** _num_ for a number
+** _list_ for an array
+** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
+
+Here we are for the time being but more coming soon!
+
+Have fun and don't hesitate to give ideas and contribute!
+  
+  
+
