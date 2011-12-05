@@ -13,6 +13,32 @@ My aim is this one and even if I don't succeed, I'll try...
 
 Here is a sample working code with this very draft code:
 
+h2. Mapping pure Json to tuples (TEMPORARY, NOT YET FUNCTIONAL... working on it)
+
+bc.. import org.mandubian.rescator._
+
+val (root, child12, child2) = 
+		(	
+			'root as obj, 
+			'root\'child1\'child12 as str, 
+			'root\'child2 as list
+		)(""" { "root" : { "child1" : { "child12" : "blabla" } }, "child2" : [ "alpha", "beta", "delta" ] } """)
+
+p. 
+
+* XPath based on symbols *'parent\'child* to get child node in JSON @{ parent : { child : "blabla" } }@
+
+bq. why \ instead of / ? because // XPath expression will be added and // is a comment in Scala and in Scala-XML, they also use \
+
+* *as* to tell the tuple mapper what is the expected type. Here are the accepted extractors coming:
+** _str_ for a string
+** _bool_ for a boolean
+** _num_ for a number
+** _list_ for an array
+** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
+
+h2. Calling/mapping a GET Json API 
+
 bc.. import org.mandubian.rescator._
 
 val (query_obj, query_type, trim_place) = 
@@ -26,16 +52,7 @@ val (query_obj, query_type, trim_place) =
 p. 
 
 * *GET("url")* to call an URL in GET mode (POST should come soon)
-* XPath based on symbols *'parent\'child* to get child node in JSON @{ parent : { child : "blabla" } }@
-
-bq. why \ instead of / ? because // XPath expression will be added and // is a comment in Scala and in Scala-XML, they also use \
-
-* *as* to tell the tuple mapper what is the expected type. Here are the accepted extractors coming:
-** _str_ for a string
-** _bool_ for a boolean
-** _num_ for a number
-** _list_ for an array
-** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
+* *>>>* is quite easy to understand 
 
 Here we are for the time being but more coming soon!
 
