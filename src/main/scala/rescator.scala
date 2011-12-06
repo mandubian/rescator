@@ -37,7 +37,9 @@ package rescator {
 	case class JsonXPath(parent:Option[JsonXPath] = None, sym:Symbol) {
 		type JsF[T] = JsValue => T
 		
-		def \ (childSym: Symbol)  = JsonXPath(Some(this), childSym)
+		//def \ (childSym: Symbol)  = JsonXPath(Some(this), childSym)
+		
+		def \ (childSym: Symbol)  = new \(Some(this), childSym)
 				
 		def parentOf(childSym: Symbol) = this \ childSym
 				
@@ -56,6 +58,10 @@ package rescator {
 		  Some(new Obj(sym)(parentObj))
 		}
 	}
+	
+	final case class \(par:Option[JsonXPath], override val sym:Symbol) 
+		extends JsonXPath(par, sym)
+	
 	
 	trait HttpHandler {
 		import dispatch.Http
