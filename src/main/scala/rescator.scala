@@ -39,7 +39,7 @@ package rescator {
 		
 		//def \ (childSym: Symbol)  = JsonXPath(Some(this), childSym)
 		
-		def \ (childSym: Symbol)  = new \(Some(this), childSym)
+		def \ (childSym: Symbol)  = JsonXPath(Some(this), childSym)
 				
 		def parentOf(childSym: Symbol) = this \ childSym
 				
@@ -59,9 +59,19 @@ package rescator {
 		}
 	}
 	
-	final case class \(par:Option[JsonXPath], override val sym:Symbol) 
-		extends JsonXPath(par, sym)
+	/*final case class \(par:Option[JsonXPath], override val sym:Symbol) 
+		extends JsonXPath(par, sym) {
+	  def this(parentSym:Symbol, sym:Symbol) = this(Some(JsonXPath(None, parentSym)), sym)	   
+	}*/
 	
+	object \ {
+	  //def apply(parentSym:Symbol, sym:Symbol) = new \(parentSym, sym)
+	  def unapply(jxp:JsonXPath):Option[(Symbol, Symbol)] = {
+	    if(jxp.parent.isDefined) Some((jxp.parent.get.sym, jxp.sym))
+	    else None
+	  }
+
+	}
 	
 	trait HttpHandler {
 		import dispatch.Http
