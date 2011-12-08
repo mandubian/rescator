@@ -25,6 +25,7 @@ val js = JS("""
 
 js: dispatch.json.JsValue = {"child1" : {"child11" : {"child112" : "blabla"}}, "child2" : {"child21" : 12345, "child22" : ["alpha", "beta", "delta"]}}
 
+p. 
 
 h3. Mapping a dispatch JsValue to a tuple
 
