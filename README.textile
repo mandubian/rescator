@@ -43,7 +43,7 @@ shall return:
 		
 child1: Option[dispatch.json.JsObject] = Some({"child11" : {"child112" : "blabla"}})
 child112: Option[String] = Some(blabla)
-child21: Option[BigDecimal] = Some(12345)
+child21: Option[Int] = Some(12345)
 child22: Option[List[dispatch.json.JsValue]] = Some(List("alpha", "beta", "delta"))
 
 p. Please remark:
@@ -55,7 +55,7 @@ bc..
 		(	
 		  'child1 as obj, 
 		  'child1\'child11\'child112 as str,
-		  'child2\'child21 as num,
+		  'child2\'child21 as int,
 		  'child2\'child22 as list
 		)
 
@@ -68,7 +68,7 @@ bq. why \ instead of / ? because // XPath expression will be added and // is a c
 ** _str_ for a string
 ** _bool_ for a boolean
 ** _num_ for a number (parses a bigdecimal as json std requires
-** __int__, __long__, __float__, __double__, __short__ for different number type you require
+** __int__, __long__, __float__, __double__, __short__ for different number types you require
 ** _list_ for an array
 ** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
 
