@@ -91,9 +91,9 @@ val (child1, child112, child21, child22) = js >>>
 shall return
 
 child1: Option[dispatch.json.JsObject] = Some({"child11" : {"child112" : "blabla"}})
-child112: Option[BigDecimal] = None
-child21: Option[BigDecimal] = Some(12345)
-child22: Option[List[dispatch.json.JsValue]] = None
+child112: Option[List[dispatch.json.JsValue]] = None
+child21: Option[String] = Some(12345)
+child22: Option[BigDecimal] = None
 		
 p. Please remark:
 * *None* is returned when:
