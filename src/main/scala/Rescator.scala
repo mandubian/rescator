@@ -5,18 +5,6 @@ import _root_.dispatch.json
 import _root_.dispatch.HandlerVerbs
 import _root_.dispatch.json._
 	
-trait RescatorImplicits {		
-	import _root_.dispatch.json.Js._
-	
-	implicit def symToJsonXPath(sym:Symbol) = \(ROOT, sym)
-	implicit def stringToJsValue(str:String) = Js(str)
-	
-	implicit def jsValueToRescatorJsonHandler(jsValue: JsValue) = new RescatorJsonHandler(jsValue)			
-	
-	implicit def handlertoRescatorHandler(subject: HandlerVerbs) = new RescatorHttpHandler(subject)
-	implicit def requesttoRescatorHandler(request:Request) = new RescatorHttpHandler(request)
-	implicit def stringToRescatorHandler(str: String) = new RescatorHttpHandler(new Request(str))			
-}
 
 object Flag extends Enumeration {
   val RECURSIVE = Value
@@ -51,7 +39,7 @@ case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
 	  ext2fun(
 	      parent match {
 		    case Some(ROOT) => Property(sym, ext)
-		    case Some(p) => new org.mandubian.rescator.dispatch.Child[T, Property[T]](
+		    case Some(p) => new org.mandubian.rescator.Child[T, Property[T]](
 	    			  			p.asObj, 
 	    			  			Property(sym, ext)
 	    	  				)
@@ -60,13 +48,13 @@ case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
 	  )
 	}
 	
-	private[rescator] def asObj:Option[org.mandubian.rescator.dispatch.Obj] = {
-	  val parentObj:Option[org.mandubian.rescator.dispatch.Obj] = parent match {
+	private[rescator] def asObj:Option[org.mandubian.rescator.Obj] = {
+	  val parentObj:Option[org.mandubian.rescator.Obj] = parent match {
 	    case Some(ROOT) => None
 	    case Some(p) => p asObj
 	    case None => None
 	  }
-	  Some(new org.mandubian.rescator.dispatch.Obj(sym)(parentObj))
+	  Some(new org.mandubian.rescator.Obj(sym)(parentObj))
 	}
 }
 
@@ -98,4 +86,5 @@ trait RescatorHandler {
 	def >>>[T1, T2, T3](block1: JsF[T1], block2: JsF[T2], block3: JsF[T3]):(T1, T2, T3)
 	def >>>[T1, T2, T3, T4](block1: JsF[T1], block2: JsF[T2], block3: JsF[T3], block4: JsF[T4]):(T1, T2, T3, T4)
 	def >>>[T1, T2, T3, T4, T5](block1: JsF[T1], block2: JsF[T2], block3: JsF[T3], block4: JsF[T4], block5: JsF[T5]): (T1, T2, T3, T4, T5)
+	def >>>[T1, T2, T3, T4, T5, T6](block1: JsF[T1], block2: JsF[T2], block3: JsF[T3], block4: JsF[T4], block5: JsF[T5], block6: JsF[T6]): (T1, T2, T3, T4, T5, T6)
 }

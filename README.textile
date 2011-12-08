@@ -35,7 +35,7 @@ val (child1, child112, child21, child22) = js >>>
 	(	
 	  R\'child1 as obj, 
 	  R\'child1\'child11\'child112 as str,
-	  R\'child2\'child21 as num,
+	  R\'child2\'child21 as int,
 	  R\'child2\'child22 as list
 	)
 
@@ -67,7 +67,8 @@ bq. why \ instead of / ? because // XPath expression will be added and // is a c
 * *as* to tell the tuple mapper what is the expected type. Here are the accepted extractors coming:
 ** _str_ for a string
 ** _bool_ for a boolean
-** _num_ for a number (parses a bigdecimal... _should provide int, float, double maybe???_
+** _num_ for a number (parses a bigdecimal as json std requires
+** __int__, __long__, __float__, __double__, __short__ for different number type you require
 ** _list_ for an array
 ** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
 

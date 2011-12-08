@@ -84,7 +84,7 @@ object RescatorSpec extends Specification {
 				  
 		  }
 		  
-		  "map JS expression to a tuple with None when JSonXPath not found" in {
+		  "map JS expression to a tuple with None when JSonXPath not found or bad mapping type" in {
 			  val js = JS(""" { 
 						      "child1" : { "child11" : { "child112" : "blabla" } }, 
 						      "child2" : { "child21": 12345, "child22": [ "alpha", "beta", "delta" ] } 
@@ -99,6 +99,27 @@ object RescatorSpec extends Specification {
 				  'child2\'child3 as list
 			  ) match {
 			    case (Some(child1), None, Some(child21), None) if(child21 == 12345) => success
+			    case _ => failure
+			  }
+				  
+		  }
+		  
+		  "map JS expression containing a number  to int, long, short, float, double" in {
+			  val js = JS(""" { 
+						      "child1" : { "child11": 112345.6789 } 
+						  }""")
+						  
+			  js >>> (	
+				  'child1\'child11 as num, 
+				  'child1\'child11 as int, 
+				  'child1\'child11 as long, 
+				  'child1\'child11 as float,
+				  'child1\'child11 as double,
+				  'child1\'child11 as short
+			  ) match {
+			    case (Some(num), Some(112345), Some(112345), 
+			        Some(112345.68F), Some(112345.6789), Some(-18727)) 
+			        	if(num == 112345.6789) => success
 			    case _ => failure
 			  }
 				  

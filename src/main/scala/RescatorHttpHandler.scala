@@ -51,6 +51,12 @@ class RescatorHttpHandler(subject:HandlerVerbs) extends RescatorHandler with Htt
 		}
 	}
 
+	def >>>[T1, T2, T3, T4, T5, T6](block1: JsF[T1], block2: JsF[T2], block3: JsF[T3], block4: JsF[T4], block5: JsF[T5], block6: JsF[T6]) = {
+		callHttp(subject) { (stream, charset) =>
+			val jsValue = json.Js(stream, charset)
+			(block1(jsValue), block2(jsValue), block3(jsValue), block4(jsValue), block5(jsValue), block6(jsValue))
+		}
+	}
 }
 
 

@@ -1,10 +1,9 @@
-package org.mandubian.rescator.dispatch
-
 import dispatch.Request
 import dispatch.json
 import dispatch.HandlerVerbs
 import dispatch.json._
 
+package org.mandubian.rescator {
 
 object int extends Extract[Int] {
     def unapply(js: JsValue) = js match {
@@ -72,3 +71,4 @@ class Obj(sym: Symbol)(implicit parent: Option[Obj])
   implicit val ctx = Some(this)
 }	
 
+}
