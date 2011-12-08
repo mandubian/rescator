@@ -15,7 +15,6 @@ package object rescator extends ImplicitHandlerVerbs with Js{
 	
 	val R = ROOT
 	val HEAD = ROOT
-	val __ = ROOT
 	
 	// ROOT\'test'\'test2 
 	// HEAD\'test'\'test2 
@@ -50,7 +49,16 @@ package rescator {
 	// ROOT\parent\child1\child11
 	// ROOT\parent\child1\child11
 	case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
-		type JsF[T] = JsValue => T
+		type JsF[T] = JsValue => Option[T]
+		
+		/** Converts a Json extractor to an assertion extracting function (JsF). */
+		private[rescator] def ext2fun[T](ext: Extract[T]): JsF[T] = jsv => {
+		  try {
+			ext.unapply(jsv)
+		  }catch {
+		    case MatchError => None
+		  }
+		}
 		
 		private[rescator] var options = Set[Flag.Value]()
 		
@@ -65,14 +73,21 @@ package rescator {
 		def parentOf(childSym: Symbol) = this \ childSym
 				
 		def as[T](ext:Extract[T]):JsF[T] = {		  
-		  Js.ext2fun(new Child[T, Property[T]](
-		      parent.flatMap(_.asObj), 
-		      Property(sym, ext)
-		  ))
+		  ext2fun(
+		      parent match {
+			    case Some(ROOT) => Property(sym, ext)
+			    case Some(p) => new Child[T, Property[T]](
+		    			  			p.asObj, 
+		    			  			Property(sym, ext)
+		    	  				)
+			    case None => Property(sym, ext)
+			  }
+		  )
 		}
 		
-		private def asObj:Option[Obj] = {
+		private[rescator] def asObj:Option[Obj] = {
 		  val parentObj:Option[Obj] = parent match {
+		    case Some(ROOT) => None
 		    case Some(p) => p asObj
 		    case None => None
 		  }
@@ -97,14 +112,6 @@ package rescator {
 	    }
 	  }
 	}
-/*	object \ {
-	  //def apply(parentSym:Symbol, sym:Symbol) = new \(parentSym, sym)
-	  def unapply(jxp:JsonXPath):Option[(Symbol, Symbol)] = {
-	    if(jxp.parent.isDefined) Some((jxp.parent.get.sym, jxp.sym))
-	    else None
-	  }
-
-	}*/
 	
 	trait JsonHandler {
 		// a simple extractor wrapper function taking a JsValue and returning another type

@@ -13,29 +13,71 @@ My aim is this one and even if I don't succeed, I'll try...
 
 Here is a sample working code with this very draft code:
 
-h2. Mapping pure Json to tuples (TEMPORARY, NOT YET FUNCTIONAL... working on it)
+h2. Mapping Json to tuples
+
+h3. Building a dispatch JsValue from a string 
+
+bc.. import org.mandubian.rescator._
+val js = JS(""" 
+	{"child1" : {"child11" : {"child112" : "blabla"}}, 
+	"child2" : {"child21" : 12345, "child22" : ["alpha", "beta", "delta"]}} 
+""")
+
+js: dispatch.json.JsValue = {"child1" : {"child11" : {"child112" : "blabla"}}, "child2" : {"child21" : 12345, "child22" : ["alpha", "beta", "delta"]}}
+
+
+h3. Mapping a dispatch JsValue to a tuple
 
 bc.. import org.mandubian.rescator._
 
-val (root, child12, child2) = 
+val (child1, child112, child21, child22) = js >>>
 		(	
-			'root as obj, 
-			'root\'child1\'child12 as str, 
-			'root\'child2 as list
-		)(""" { "root" : { "child1" : { "child12" : "blabla" } }, "child2" : [ "alpha", "beta", "delta" ] } """)
+		  'child1 as obj, 
+		  'child1\'child11\'child112 as str,
+		  'child2\'child21 as num,
+		  'child2\'child22 as list
+		)
 
-p. 
+shall return:
+		
+child1: Option[dispatch.json.JsObject] = Some({"child11" : {"child112" : "blabla"}})
+child112: Option[String] = Some(blabla)
+child21: Option[BigDecimal] = Some(12345)
+child22: Option[List[dispatch.json.JsValue]] = Some(List("alpha", "beta", "delta"))
+
+p. Please remark
 
 * XPath based on symbols *'parent\'child* to get child node in JSON @{ parent : { child : "blabla" } }@
 
-bq. why \ instead of / ? because // XPath expression will be added and // is a comment in Scala and in Scala-XML, they also use \
+bq. why \ instead of / ? because // XPath expression will be added and // is a comment in Scala and Scala-XML also uses \
 
 * *as* to tell the tuple mapper what is the expected type. Here are the accepted extractors coming:
 ** _str_ for a string
 ** _bool_ for a boolean
-** _num_ for a number
+** _num_ for a number (parses a bigdecimal... _should provide int, float, double maybe???_
 ** _list_ for an array
 ** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
+
+* the result is a TupleN[Option[T]] so it means, if you give a bad JsonXPath, rescator shall put None in the tuple
+
+h3. Mapping to a tuple with not found JsonXPath
+
+bc.. import org.mandubian.rescator._
+
+val (child1, child112, child21, child22) = js >>>
+		(	
+		  'child1 as obj, 
+		  'child1\'child11\'child112 as list,
+		  'child2\'child21 as str,
+		  'child2\'child3 as num
+		)
+
+shall return:
+		
+child1: Option[dispatch.json.JsObject] = Some({"child11" : {"child112" : "blabla"}})
+child112: Option[String] = Some(blabla)
+child21: Option[BigDecimal] = Some(12345)
+child22: Option[List[dispatch.json.JsValue]] = Some(List("alpha", "beta", "delta")) 
 
 h2. Calling/mapping a GET Json API 
 
