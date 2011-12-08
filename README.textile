@@ -1,6 +1,6 @@
 h1. Rescator is a very simple Scala Json Rest Client API
 
-bq. alpha version so should evolve quite a lot
+bq. ALPHA version which can already be tested but the API can still evolve so don't rely on it i in a closed way...
 
 For the time being, Rescator is *100% Scala* and is aimed at:
 * *Calling Rest Json API in a very simple way*
@@ -31,12 +31,12 @@ h3. Mapping a dispatch JsValue to a tuple
 bc.. import org.mandubian.rescator._
 
 val (child1, child112, child21, child22) = js >>>
-		(	
-		  'child1 as obj, 
-		  'child1\'child11\'child112 as str,
-		  'child2\'child21 as num,
-		  'child2\'child22 as list
-		)
+	(	
+	  R\'child1 as obj, 
+	  R\'child1\'child11\'child112 as str,
+	  R\'child2\'child21 as num,
+	  R\'child2\'child22 as list
+	)
 
 shall return:
 		
@@ -45,8 +45,20 @@ child112: Option[String] = Some(blabla)
 child21: Option[BigDecimal] = Some(12345)
 child22: Option[List[dispatch.json.JsValue]] = Some(List("alpha", "beta", "delta"))
 
-p. Please remark
+p. Please remark:
 
+* The *R\* which can be written *ROOT\* means it begins from the ROOT node. *If you remove the R\, it works also as it will start on ROOT node by default*. So you can write also:
+
+bc.. 	
+	val (child1, child112, child21, child22) = js >>>
+		(	
+		  'child1 as obj, 
+		  'child1\'child11\'child112 as str,
+		  'child2\'child21 as num,
+		  'child2\'child22 as list
+		)
+
+p. 		
 * XPath based on symbols *'parent\'child* to get child node in JSON @{ parent : { child : "blabla" } }@
 
 bq. why \ instead of / ? because // XPath expression will be added and // is a comment in Scala and Scala-XML also uses \
@@ -60,25 +72,32 @@ bq. why \ instead of / ? because // XPath expression will be added and // is a c
 
 * the result is a TupleN[Option[T]] so it means, if you give a bad JsonXPath, rescator shall put None in the tuple
 
-h3. Mapping to a tuple with not found JsonXPath
+==<br/>==
+
+h3. Mapping to a tuple with not found JsonXPath or bad type
 
 bc.. import org.mandubian.rescator._
 
 val (child1, child112, child21, child22) = js >>>
-		(	
-		  'child1 as obj, 
-		  'child1\'child11\'child112 as list,
-		  'child2\'child21 as str,
-		  'child2\'child3 as num
-		)
+	(	
+	  'child1 as obj, 
+	  'child1\'child11\'child112 as list,
+	  'child2\'child21 as str,
+	  'child2\'child3 as num
+	)
 
-shall return:
-		
+shall return
+
 child1: Option[dispatch.json.JsObject] = Some({"child11" : {"child112" : "blabla"}})
-child112: Option[String] = Some(blabla)
+child112: Option[BigDecimal] = None
 child21: Option[BigDecimal] = Some(12345)
-child22: Option[List[dispatch.json.JsValue]] = Some(List("alpha", "beta", "delta")) 
-
+child22: Option[List[dispatch.json.JsValue]] = None
+		
+p. Please remark:
+* *None* is returned when:
+** the JsonXPath is not found in the JsValue
+** the mapping type is not the right one		
+		
 h2. Calling/mapping a GET Json API 
 
 bc.. import org.mandubian.rescator._
@@ -91,8 +110,7 @@ val (query_obj, query_type, trim_place) =
 			'query\'params\'trim_place as bool
 		)
 
-p. 
-
+p. Please remark:
 * *GET("url")* to call an URL in GET mode (POST should come soon)
 * *>>>* is quite easy to understand 
 

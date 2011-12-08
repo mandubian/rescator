@@ -83,6 +83,26 @@ object RescatorSpec extends Specification {
 			  }
 				  
 		  }
+		  
+		  "map JS expression to a tuple with None when JSonXPath not found" in {
+			  val js = JS(""" { 
+						      "child1" : { "child11" : { "child112" : "blabla" } }, 
+						      "child2" : { "child21": 12345, "child22": [ "alpha", "beta", "delta" ] } 
+						  }""")
+						  
+			  val child1 =  JS("""{ "child11" : { "child112" : "blabla" } }""")
+			  val child22 = List("alpha", "beta", "delta")
+			  js >>> (	
+				  'child1 as obj, 
+				  'child1\'child11\'child112 as num,
+				  'child2\'child21 as num,
+				  'child2\'child3 as list
+			  ) match {
+			    case (Some(child1), None, Some(child21), None) if(child21 == 12345) => success
+			    case _ => failure
+			  }
+				  
+		  }
 	  }
   }
 }
