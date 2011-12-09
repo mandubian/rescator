@@ -72,21 +72,23 @@ class Obj(sym: Symbol)(implicit parent: Option[Obj])
 }	
 
 /** Extractor that resolves first by its parent extractor, if present. */
-case class RecursiveChild[T, E <: Insert[T]](parent: Option[Obj], self: E) extends Extract[T] with Insert[T] {
+/*case class RecursiveChild[T, E <: Insert[T]](override val parent: Option[Obj], override val self: E) 
+	extends Child[T, E](parent, self) with Insert[T]{
   def unapply(js: JsValue) = {
-	  def recUnapply[T2, E2](js: JsValue, child:Child[T2, E2]) = {
-		  child.parent map { parent =>  
-		    js match {
-	      		case parent(self(t)) => Some(t)
-	      		case _ => recUnapply(js, this.self)
-		    } 
-		  } getOrElse { 
-			  js match {
-			  	case self(t) => Some(t)
-			  	case _ => None
-			  }
-		  }
-	  }
+	  /*def recUnapply[T2, E2 <: Insert[T2]](js: JsValue, child:Child[T2, E2]):T2 = {
+		  child.parent map { parent => js match {
+		      	case parent(self(t:T2)) => Some(t)
+		      	case _ => 
+		      		  child.self match {
+		      		    case obj:Obj => recUnapply(js, obj)
+		      		    case _ => None
+		      		  }
+		  	} 
+		  } getOrElse { js match {
+	      	case self(t) => Some(t)
+	      	case _ => None
+	    }
+	  }*/
 	  
 	  parent map { parent =>  js match {
 	      case parent(self(t)) => Some(t)
@@ -100,5 +102,5 @@ case class RecursiveChild[T, E <: Insert[T]](parent: Option[Obj], self: E) exten
   def << (t: T)(js: JsValue) = parent map { parent => js match {
       case parent(my_js) => (parent << (self << t)(my_js))(js)
     } } getOrElse (self << t)(js)
-}
+}*/
 }
