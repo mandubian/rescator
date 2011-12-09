@@ -13,7 +13,8 @@ object Flag extends Enumeration {
 // { "parent" : { "child1" : { "child11" : "blabla" } } } 
 // ROOT\parent\child1\child11
 // ROOT\parent\child1\child11
-case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
+case class JsonPath(parent:Option[JsonPath] = Some(ROOT), sym:Symbol)
+ {
 	// Dispatch overriden to return an Option[T] instead of T
 	type JsF[T] = JsValue => Option[T]		
 	
@@ -35,7 +36,7 @@ case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
 	
 	def parentOf(childSym: Symbol) = this \ childSym
 			
-	def as[T](ext:Extract[T]):JsF[T] = {	
+	def as[T](ext:Extract[T]):JsF[T] = {
 	  ext2fun(
 	      parent match {
 		    case Some(ROOT) => Property(sym, ext)
@@ -48,7 +49,7 @@ case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
 	  )
 	}
 	
-	private[rescator] def asObj:Option[org.mandubian.rescator.Obj] = {
+	def asObj:Option[org.mandubian.rescator.Obj] = {
 	  val parentObj:Option[org.mandubian.rescator.Obj] = parent match {
 	    case Some(ROOT) => None
 	    case Some(p) => p asObj
@@ -58,17 +59,17 @@ case class JsonXPath(parent:Option[JsonXPath] = Some(ROOT), sym:Symbol) {
 	}
 }
 
-case class \(par:JsonXPath, override val sym:Symbol) 
-	extends JsonXPath(Some(par), sym)
+case class \(par:JsonPath, override val sym:Symbol) 
+	extends JsonPath(Some(par), sym)
 
-case object ROOT extends JsonXPath(None, 'ROOT) 
+case object ROOT extends JsonPath(None, 'ROOT) 
 
-class \\(par:JsonXPath, override val sym:Symbol)
-	extends JsonXPath(Some(par), sym) {
+class \\(par:JsonPath, override val sym:Symbol)
+	extends JsonPath(Some(par), sym) {
   options += Flag.RECURSIVE
 }
 object \\ {
-  def unapply(jxp:JsonXPath):Option[(JsonXPath, Symbol)] = {
+  def unapply(jxp:JsonPath):Option[(JsonPath, Symbol)] = {
     jxp match {
       case e @ \(par, sym) if e.options.contains(Flag.RECURSIVE) => Some((par, sym))
       case _ => None

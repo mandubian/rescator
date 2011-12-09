@@ -72,11 +72,11 @@ bq. why \ instead of / ? because // XPath expression will be added and // is a c
 ** _list_ for an array
 ** _obj_ for getting a complete _dispatch.json.JsObject_ and manage it yourself
 
-* the result is a TupleN[Option[T]] so it means, if you give a bad JsonXPath, rescator shall put None in the tuple
+* the result is a TupleN[Option[T]] so it means, if you give a bad JsonPath, rescator shall put None in the tuple
 
 ==<br/>==
 
-h3. Mapping to a tuple with not found JsonXPath or bad type
+h3. Mapping to a tuple with not found JsonPath or bad type
 
 bc.. import org.mandubian.rescator._
 
@@ -97,7 +97,7 @@ child22: Option[BigDecimal] = None
 		
 p. Please remark:
 * *None* is returned when:
-** the JsonXPath is not found in the JsValue
+** the JsonPath is not found in the JsValue
 ** the mapping type is not the right one		
 		
 h2. Calling/mapping a GET Json API 
