@@ -71,4 +71,34 @@ class Obj(sym: Symbol)(implicit parent: Option[Obj])
   implicit val ctx = Some(this)
 }	
 
+/** Extractor that resolves first by its parent extractor, if present. */
+case class RecursiveChild[T, E <: Insert[T]](parent: Option[Obj], self: E) extends Extract[T] with Insert[T] {
+  def unapply(js: JsValue) = {
+	  def recUnapply[T2, E2](js: JsValue, child:Child[T2, E2]) = {
+		  child.parent map { parent =>  
+		    js match {
+	      		case parent(self(t)) => Some(t)
+	      		case _ => recUnapply(js, this.self)
+		    } 
+		  } getOrElse { 
+			  js match {
+			  	case self(t) => Some(t)
+			  	case _ => None
+			  }
+		  }
+	  }
+	  
+	  parent map { parent =>  js match {
+	      case parent(self(t)) => Some(t)
+	    } } getOrElse { js match {
+	      case self(t) => Some(t)
+	      case _ => None
+	    }
+	  }
+  }
+  /** Inserts the value t in self and replaces self in parent, if any. */
+  def << (t: T)(js: JsValue) = parent map { parent => js match {
+      case parent(my_js) => (parent << (self << t)(my_js))(js)
+    } } getOrElse (self << t)(js)
+}
 }
